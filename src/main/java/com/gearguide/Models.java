@@ -141,6 +141,10 @@ public final class Models {
         public boolean replaceExisting;
         public Map<String, Pick> equipment = new LinkedHashMap<>();
         public List<InventoryPick> inventory = new ArrayList<>();
+
+        /** Bank supplies for manually filling a pouch or charging an item; not inventory slots. */
+        public List<Pick> runes = new ArrayList<>();
+
         public Map<String, List<Upgrade>> upgrades = new LinkedHashMap<>();
 
         @Override
@@ -151,6 +155,7 @@ public final class Models {
         public List<Pick> picks() {
             List<Pick> out = new ArrayList<>(equipment.values());
             for (InventoryPick p : inventory) out.add(p.item);
+            out.addAll(runes);
             return out;
         }
     }

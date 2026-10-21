@@ -1,5 +1,13 @@
 # Changes
 
+## 0.10.1
+
+- Added editable rune supplies to saved loadouts, with required quantities and shortage checks in the sidebar.
+- The loadout bank view now includes rune supplies in separate rows below equipment and inventory.
+- Added optional `runes` metadata for the local API and AI-generated builds. Older setups remain compatible. Pouch filling and item charging remain manual.
+
+Validation: 112 automated tests passed against RuneLite 1.13.3, including full inventories, rune rows, combined quantities, persistence, older setup JSON and sidebar quantities.
+
 ## 0.10.0
 
 - Focused the public release on gear setups and bank organization. Removed Directions, its Slayer location data, path overlay and Shortest Path integration.

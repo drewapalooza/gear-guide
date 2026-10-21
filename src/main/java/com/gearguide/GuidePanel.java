@@ -327,7 +327,8 @@ public final class GuidePanel extends PluginPanel {
                         + snapshot.task.name
                         + " if one exists; otherwise create and push it from my current bank."
                         + " Preserve my edited builds. Choose task-relevant travel and utility"
-                        + " items from my owned supplies. Format task notes as Markdown with"
+                        + " items from my owned supplies, including explicit rune supplies in the"
+                        + " optional runes array. Format task notes as Markdown with"
                         + " headings, bullets and numbered fight steps.";
         Toolkit.getDefaultToolkit()
                 .getSystemClipboard()
@@ -513,6 +514,19 @@ public final class GuidePanel extends PluginPanel {
             for (int i = 0; i < 28; i++)
                 inventory.add(tile(inv.get(i), "Slot " + (i + 1), i, false));
             content.add(inventory);
+            if (!active.runes.isEmpty()) {
+                heading("RUNE SUPPLIES");
+                content.add(
+                        text(
+                                "Extra bank supplies.\n"
+                                    + "Fill pouch / charge items manually.\n"
+                                    + "Pouch contents are not checked.",
+                                MUTED));
+                JPanel runes = new JPanel(new GridLayout(0, 4, 4, 4));
+                runes.setOpaque(false);
+                for (Pick rune : active.runes) runes.add(tile(rune, "Rune supply", -1, false));
+                content.add(runes);
+            }
         }
         revalidate();
         repaint();

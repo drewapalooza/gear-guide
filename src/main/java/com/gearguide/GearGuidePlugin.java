@@ -648,33 +648,8 @@ public class GearGuidePlugin extends Plugin {
             return;
         }
 
-        Layout layout = new Layout(TAG);
-
-        Map<String, Integer> positions =
-                Map.ofEntries(
-                        Map.entry("HEAD", 1),
-                        Map.entry("CAPE", 8),
-                        Map.entry("AMULET", 9),
-                        Map.entry("AMMO", 11),
-                        Map.entry("WEAPON", 16),
-                        Map.entry("BODY", 17),
-                        Map.entry("SHIELD", 18),
-                        Map.entry("LEGS", 25),
-                        Map.entry("GLOVES", 32),
-                        Map.entry("BOOTS", 33),
-                        Map.entry("RING", 34));
-
-        for (Map.Entry<String, Pick> e : setup.equipment.entrySet()) {
-
-            ids.add(e.getValue().itemId);
-            layout.setItemAtPos(e.getValue().itemId, positions.get(e.getKey()));
-        }
-
-        for (InventoryPick p : setup.inventory) {
-
-            ids.add(p.item.itemId);
-            layout.setItemAtPos(p.item.itemId, (p.slot / 4) * 8 + 4 + p.slot % 4);
-        }
+        Layout layout = LoadoutBankLayout.build(TAG, setup);
+        for (Pick pick : setup.picks()) ids.add(pick.itemId);
 
         highlighted = Collections.unmodifiableSet(ids);
         layouts.saveLayout(layout);

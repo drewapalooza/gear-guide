@@ -10,6 +10,7 @@ Gear setups and bank organization for RuneLite, with optional AI assistance.
 - Keep exact equipment slots, a 28-slot inventory, and Markdown task notes together.
 - Check owned quantities, known skill requirements, two-handed weapons and shields, and potion-storage doses.
 - Display a saved setup as a temporary Bank Tags layout, with readiness colours in the sidebar.
+- Include editable rune supplies below the loadout in the bank, with required quantities in the sidebar.
 - Categorize bank items into nine numbered colours, search and filter them, and save your own category assignments.
 - Group the current bank view visually without moving stored items.
 - Optionally match saved setups to a Slayer task and combat style.
@@ -24,6 +25,8 @@ Enable **Gear Guide** and its built-in **Bank Tags** dependency. Log in and open
 Use the save icon to capture your current equipment and inventory. Review the name, combat style, target, items and notes, then save. The pencil edits an existing setup. **Loadout**, **Notes**, and **Bank** are always visible navigation buttons; changing pages preserves the controls on each page.
 
 The bank icon displays the selected loadout in the bank. The grid icon returns to the ordinary bank view. Green means the item is in its intended slot; gold means it is owned but needs moving; red means a quantity or known requirement is missing. Withdraw and equip items yourself.
+
+In the setup editor, use **Edit runes** to add the rune types and quantities needed for your pouch or item charges. They appear in separate rows below equipment and inventory in the bank, and under **Rune supplies** in the sidebar. These are additional supplies, not extra inventory slots. Fill your pouch or charge items manually; the plugin does not read pouch contents or calculate runes from spell selections or notes. Existing setups keep working and can have rune supplies added through the editor.
 
 For stored potions, select the withdrawal dose shown in the setup. Bottle sizes share one dose pool and cannot be counted independently.
 

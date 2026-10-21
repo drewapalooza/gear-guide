@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$jarPath = Join-Path $PSScriptRoot 'build\libs\gear-guide-0.10.0-all.jar'
+$jarPath = Join-Path $PSScriptRoot 'build\libs\gear-guide-0.10.1-all.jar'
 if (-not (Test-Path -LiteralPath $jarPath)) { throw 'Build first with .\gradlew.bat test shadowJar, or extract the full release folder.' }
 $javaCommand = Get-Command javaw.exe -ErrorAction SilentlyContinue
 if (-not $javaCommand) { throw 'Install Java 17 or newer, then run this launcher again.' }

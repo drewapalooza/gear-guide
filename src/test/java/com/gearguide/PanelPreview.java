@@ -97,6 +97,24 @@ public final class PanelPreview {
                         panel.printAll(bg);
                         bg.dispose();
                         ImageIO.write(out, "png", new File("bank-guide-preview.png"));
+                        s.bank.add(GuideStoreTest.item(563, "Law rune", 100, null, true));
+                        s.bank.add(GuideStoreTest.item(554, "Fire rune", 500, null, true));
+                        s.bank.add(GuideStoreTest.item(556, "Air rune", 500, null, true));
+                        t.runes.add(new Pick(563, 100));
+                        t.runes.add(new Pick(554, 500));
+                        t.runes.add(new Pick(556, 500));
+                        panel.update(s, saved, 17654);
+                        for (Component c : panel.getComponents())
+                            if (c instanceof GuideNavigation)
+                                ((GuideNavigation) c).select("loadout");
+                        panel.setSize(260, 1150);
+                        layout(panel);
+                        BufferedImage runePreview =
+                                new BufferedImage(260, 1150, BufferedImage.TYPE_INT_RGB);
+                        Graphics2D rg = runePreview.createGraphics();
+                        panel.printAll(rg);
+                        rg.dispose();
+                        ImageIO.write(runePreview, "png", new File("docs/rune-supplies.png"));
                         BufferedImage tabPreview =
                                 new BufferedImage(460, 105, BufferedImage.TYPE_INT_RGB);
                         Graphics2D tabGraphics = tabPreview.createGraphics();

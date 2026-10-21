@@ -6,7 +6,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-if not exist "%~dp0build\libs\gear-guide-0.10.0-all.jar" (
+if not exist "%~dp0build\libs\gear-guide-0.10.1-all.jar" (
   echo Extract the complete Gear Guide package before starting it.
   pause
   exit /b 1

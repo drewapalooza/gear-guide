@@ -40,13 +40,24 @@ final class SetupEditor {
         JComboBox<String> style =
                 new JComboBox<>(new String[] {"melee", "ranged", "magic", "hybrid"});
         style.setSelectedItem(draft.combatStyle);
-        JPanel fields = new JPanel(new GridLayout(3, 2, 6, 6));
+        JPanel fields = new JPanel(new GridLayout(4, 2, 6, 6));
         fields.add(new JLabel("Build name"));
         fields.add(name);
         fields.add(new JLabel("Enemy type (task name)"));
         fields.add(enemy);
         fields.add(new JLabel("Combat style"));
         fields.add(style);
+        JButton runeSupplies = new JButton("Edit runes (" + draft.runes.size() + ")…");
+        fields.add(new JLabel("Pouch / charging supplies"));
+        fields.add(runeSupplies);
+        runeSupplies.addActionListener(
+                e -> {
+                    List<Pick> edited = RuneSupplyEditor.edit(dialog, snapshot, draft.runes);
+                    if (edited != null) {
+                        draft.runes = edited;
+                        runeSupplies.setText("Edit runes (" + edited.size() + ")…");
+                    }
+                });
         root.add(fields, BorderLayout.NORTH);
         Map<Integer, OwnedItem> catalog = new TreeMap<>();
         for (OwnedItem i : snapshot.catalog()) catalog.put(i.id, i);
@@ -218,7 +229,7 @@ final class SetupEditor {
         dialog.setVisible(true);
     }
 
-    private static OwnedItem pickItem(Component parent, List<OwnedItem> items) {
+    static OwnedItem pickItem(Component parent, List<OwnedItem> items) {
         items.sort(Comparator.comparing(i -> i.name));
         JTextField search = new JTextField();
         DefaultListModel<OwnedItem> model = new DefaultListModel<>();

@@ -39,6 +39,57 @@ public class GuidePanelTest {
     }
 
     @Test
+    public void runeSuppliesShowQuantitiesWithoutClaimingPouchReadiness() throws Exception {
+        SwingUtilities.invokeAndWait(
+                () -> {
+                    GuidePanel panel =
+                            new GuidePanel(
+                                    new com.google.gson.Gson(),
+                                    null,
+                                    new GuidePanel.Actions() {
+                                        public void select(String id) {}
+
+                                        public void delete(String id) {}
+
+                                        public void filter() {}
+
+                                        public void unfilter() {}
+
+                                        public void exportSnapshot() {}
+
+                                        public void capture() {}
+                                    });
+                    Snapshot snapshot = GuideStoreTest.snapshot();
+                    OwnedItem rune = GuideStoreTest.item(565, "Blood rune", 1000, null, true);
+                    rune.slot = 0;
+                    snapshot.inventory.add(rune);
+                    Setup setup = GuideStoreTest.setup(snapshot);
+                    setup.runes.add(new Pick(565, 1000));
+                    GuideStore.Saved saved = new GuideStore.Saved();
+                    saved.active = setup.id;
+                    saved.setups.put(setup.id, setup);
+                    panel.update(snapshot, saved, 0);
+                    assertTrue(
+                            find(panel, javax.swing.JLabel.class).stream()
+                                    .anyMatch(l -> "RUNE SUPPLIES".equals(l.getText())));
+                    JPanel tile =
+                            find(panel, JPanel.class).stream()
+                                    .filter(
+                                            p ->
+                                                    p.getToolTipText() != null
+                                                            && p.getToolTipText()
+                                                                    .startsWith("Rune supply:"))
+                                    .findFirst()
+                                    .orElseThrow();
+                    assertTrue(tile.getToolTipText().contains("Blood rune ×1000"));
+                    assertFalse(tile.getToolTipText().contains("Ready"));
+                    assertTrue(
+                            find(tile, javax.swing.JLabel.class).stream()
+                                    .anyMatch(l -> "×1000".equals(l.getText())));
+                });
+    }
+
+    @Test
     public void everyPageRemainsDirectlyClickableAtSidebarWidth() throws Exception {
         SwingUtilities.invokeAndWait(
                 () -> {

@@ -33,4 +33,6 @@ Equipment keys are `HEAD`, `CAPE`, `AMULET`, `WEAPON`, `BODY`, `SHIELD`, `LEGS`,
 
 Existing enemy/style matches are reused by default. Set `replaceExisting: true` only for an intentional revision. A changed account, revision or requirement must be reconsidered against a fresh snapshot; do not merely substitute a new revision into stale advice.
 
+The optional `runes` array holds additional `{itemId, quantity, note}` picks for manually filling a pouch or charging items. Rune supplies are shown below the loadout in the bank and in a separate sidebar section, without consuming the 28 inventory slots. Only unique, observed, unnoted, stackable rune types are accepted (at most 32); quantities are checked together with equipment and inventory. A loose inventory stack plus a rune-supply entry for the same ID requires their combined quantity. Omission means no extra rune supplies. Pouch contents and charges are not read; notes are never parsed to infer rune requirements.
+
 The API cannot withdraw, equip, move, cast, fight, or execute game actions. Provider credentials are not part of the API.

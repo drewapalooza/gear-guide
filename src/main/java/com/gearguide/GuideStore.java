@@ -285,6 +285,8 @@ public final class GuideStore {
             fail("notes must be at most 8000 characters.");
         if (s.equipment == null || s.inventory == null || s.inventory.size() > 28)
             fail("Invalid equipment or inventory.");
+        if (s.runes == null || s.runes.size() > RuneSupplies.MAX_TYPES)
+            fail("Invalid rune supplies (maximum 32 types).");
         if (s.equipment.isEmpty() && s.inventory.isEmpty()) fail("Setup is empty.");
         Map<Integer, OwnedItem> catalog = new HashMap<>();
         for (OwnedItem i : bank.catalog()) catalog.put(i.id, i);
@@ -311,6 +313,12 @@ public final class GuideStore {
             GearRequirements.check(i, bank);
             if (!i.stackable && p.item.quantity > 1)
                 fail("Use separate inventory slots for non-stackable " + i.name);
+        }
+        Set<Integer> runeIds = new HashSet<>();
+        for (Pick rune : s.runes) {
+            OwnedItem item = checkPick(rune, catalog, needed);
+            if (!RuneSupplies.isRune(item)) fail("Rune supplies must contain unnoted runes.");
+            if (!runeIds.add(rune.itemId)) fail("Rune supplies must use unique rune types.");
         }
         for (Map.Entry<Integer, Long> n : bank.shortages(needed).entrySet())
             fail(
