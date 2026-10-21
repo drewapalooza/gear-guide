@@ -118,8 +118,10 @@ public final class GuidePanel extends PluginPanel {
     private java.util.List<String> lastChoices = Collections.emptyList();
     private int apiPort;
     private String lastNotes;
+    private final com.google.gson.Gson gson;
 
-    public GuidePanel(ItemManager items, Actions actions) {
+    public GuidePanel(com.google.gson.Gson gson, ItemManager items, Actions actions) {
+        this.gson = gson;
         this.items = items;
         this.actions = actions;
         bankGuide = new BankGuidePanel(actions::assignBank, actions::groupBank, actions::unfilter);
@@ -223,7 +225,7 @@ public final class GuidePanel extends PluginPanel {
                         "Edit selected build and Markdown notes",
                         () -> {
                             if (activeSetup != null)
-                                SetupEditor.open(this, snapshot, activeSetup, actions::save);
+                                SetupEditor.open(gson, this, snapshot, activeSetup, actions::save);
                         }));
         footer.add(
                 iconButton(
@@ -487,7 +489,7 @@ public final class GuidePanel extends PluginPanel {
                     content.add(
                             text(
                                     "For stored potions, select the matching withdrawal dose in"
-                                        + " potion storage.",
+                                            + " potion storage.",
                                     MUTED));
             }
             heading("EQUIPMENT");

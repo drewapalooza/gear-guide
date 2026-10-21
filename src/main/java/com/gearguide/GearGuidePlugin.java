@@ -65,7 +65,7 @@ public class GearGuidePlugin extends Plugin {
 
     @Inject private ConfigManager configManager;
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    @Inject private Gson gson;
 
     private GuideStore store;
 
@@ -121,7 +121,7 @@ public class GearGuidePlugin extends Plugin {
 
         store = new GuideStore(root, gson);
 
-        organizer = new BankOrganizer(root);
+        organizer = new BankOrganizer(root, gson);
 
         running = true;
 
@@ -129,6 +129,7 @@ public class GearGuidePlugin extends Plugin {
                 () ->
                         panel =
                                 new GuidePanel(
+                                        gson,
                                         items,
                                         new GuidePanel.Actions() {
 
@@ -269,7 +270,7 @@ public class GearGuidePlugin extends Plugin {
         if (SwingUtilities.isEventDispatchThread()) createPanel.run();
         else SwingUtilities.invokeAndWait(createPanel);
 
-        ai = new AiBuildController(store, panel, root, this::setupChanged);
+        ai = new AiBuildController(store, panel, root, gson, this::setupChanged);
 
         if (config.assistantConnection()) {
             api = new LocalApi(store, gson, root.resolve("connection.json"), this::setupChanged);
@@ -282,7 +283,7 @@ public class GearGuidePlugin extends Plugin {
                         () ->
                                 panel.aiStatus(
                                         "Local connection unavailable. Gear and bank tools still"
-                                            + " work; check the port in settings."));
+                                                + " work; check the port in settings."));
             }
         }
 
@@ -709,7 +710,7 @@ public class GearGuidePlugin extends Plugin {
         if (active != null) {
             panelError(
                     "Open an ordinary bank tab first, then group by colour. Your existing tag"
-                        + " layout is preserved.");
+                            + " layout is preserved.");
             return;
         }
 
@@ -928,6 +929,7 @@ public class GearGuidePlugin extends Plugin {
                     }
 
                     SetupEditor.open(
+                            gson,
                             panel,
                             s,
                             setup,

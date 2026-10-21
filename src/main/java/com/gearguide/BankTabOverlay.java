@@ -65,7 +65,7 @@ final class BankTabOverlay extends Overlay {
                             number,
                             false,
                             "Suggested destination tab; drag items manually in the normal bank"
-                                + " view"));
+                                    + " view"));
         }
         return null;
     }

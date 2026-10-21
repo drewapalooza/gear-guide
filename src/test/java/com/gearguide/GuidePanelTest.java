@@ -72,6 +72,7 @@ public class GuidePanelTest {
                 () -> {
                     GuidePanel panel =
                             new GuidePanel(
+                                    new com.google.gson.Gson(),
                                     null,
                                     new GuidePanel.Actions() {
                                         public void select(String id) {}

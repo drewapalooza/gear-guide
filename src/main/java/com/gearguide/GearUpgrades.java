@@ -52,7 +52,7 @@ final class GearUpgrades {
                             "Scythe of vitur",
                             "Best",
                             "Duke-specific ranking; two-handed, charged weapon. Remove your"
-                                + " defender."));
+                                    + " defender."));
         if (build.upgrades != null && build.upgrades.containsKey(slot))
             return build.upgrades.get(slot);
         if (Arrays.asList(6585, 19553, 29801, 29804).contains(selected)

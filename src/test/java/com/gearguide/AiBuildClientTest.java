@@ -50,7 +50,7 @@ public class AiBuildClientTest {
         Snapshot s = GuideStoreTest.snapshot();
         s.accountId = "private-account-id";
         s.revision = "private-revision";
-        String p = AiBuildClient.prompt(s, "melee", "relaxed");
+        String p = new AiBuildClient(new Gson()).prompt(s, "melee", "relaxed");
         assertFalse(p.contains("private-account-id"));
         assertFalse(p.contains("private-revision"));
         assertTrue(p.contains("relaxed"));
@@ -90,7 +90,8 @@ public class AiBuildClientTest {
         s.accountId = "wrong";
         s.replaceExisting = true;
         Setup parsed =
-                AiBuildClient.parse("```json\n" + new Gson().toJson(s) + "\n```", bank, "melee");
+                new AiBuildClient(new Gson())
+                        .parse("```json\n" + new Gson().toJson(s) + "\n```", bank, "melee");
         assertEquals(bank.accountId, parsed.accountId);
         assertEquals("wyrms-melee", parsed.id);
         assertFalse(parsed.replaceExisting);
@@ -102,7 +103,7 @@ public class AiBuildClientTest {
         bank.task.enemyType = "wyrms";
         Setup s = GuideStoreTest.setup(bank);
         s.equipment.values().iterator().next().itemId = 999999;
-        AiBuildClient.parse(new Gson().toJson(s), bank, "melee");
+        new AiBuildClient(new Gson()).parse(new Gson().toJson(s), bank, "melee");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -112,6 +113,6 @@ public class AiBuildClientTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidJsonIsRejected() {
-        AiBuildClient.parse("not json", GuideStoreTest.snapshot(), "melee");
+        new AiBuildClient(new Gson()).parse("not json", GuideStoreTest.snapshot(), "melee");
     }
 }

@@ -15,15 +15,14 @@ import javax.swing.table.DefaultTableModel;
 
 /** Human-facing editor; all changes stay in a draft until Save succeeds. */
 final class SetupEditor {
-    static void open(Component parent, Snapshot snapshot, Setup original, Predicate<Setup> save) {
+    static void open(
+            Gson gson, Component parent, Snapshot snapshot, Setup original, Predicate<Setup> save) {
         if (snapshot == null || !snapshot.bankKnown) {
             JOptionPane.showMessageDialog(parent, "Open your bank first.");
             return;
         }
         Setup draft =
-                original == null
-                        ? new Setup()
-                        : new Gson().fromJson(new Gson().toJson(original), Setup.class);
+                original == null ? new Setup() : gson.fromJson(gson.toJson(original), Setup.class);
         if (original == null) {
             draft.enemyType = snapshot.task.known ? snapshot.task.enemyType : "";
             draft.name = snapshot.task.name.isBlank() ? "My setup" : snapshot.task.name;

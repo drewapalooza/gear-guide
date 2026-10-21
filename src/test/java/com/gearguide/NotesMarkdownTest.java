@@ -10,12 +10,12 @@ public class NotesMarkdownTest {
         String s =
                 NotesMarkdown.render(
                         "# Fight\n"
-                            + "## Prep\n"
-                            + "- **Prayer**\n"
-                            + "- Food\n\n"
-                            + "1. Attack\n"
-                            + "2. Dodge\n\n"
-                            + "Use `slash` and *eat*.");
+                                + "## Prep\n"
+                                + "- **Prayer**\n"
+                                + "- Food\n\n"
+                                + "1. Attack\n"
+                                + "2. Dodge\n\n"
+                                + "Use `slash` and *eat*.");
         assertTrue(s.contains("<h1>Fight</h1>"));
         assertTrue(s.contains("<h2>Prep</h2>"));
         assertTrue(s.contains("<ul>"));
@@ -30,8 +30,8 @@ public class NotesMarkdownTest {
         String s =
                 NotesMarkdown.render(
                         "<img src='https://example.com/track'>\n"
-                            + "<script>alert(1)</script>\n"
-                            + "![image](https://example.com/a.png)");
+                                + "<script>alert(1)</script>\n"
+                                + "![image](https://example.com/a.png)");
         assertFalse(s.contains("<img"));
         assertFalse(s.contains("<script"));
         assertTrue(s.contains("&lt;img"));

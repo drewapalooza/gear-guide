@@ -46,12 +46,13 @@ final class BankOrganizer {
     }
 
     private final Path root;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson gson;
     private String account;
     private Map<Integer, Integer> overrides = new HashMap<>();
 
-    BankOrganizer(Path root) {
+    BankOrganizer(Path root, Gson gson) {
         this.root = root;
+        this.gson = gson;
     }
 
     synchronized void account(String id) throws java.io.IOException {
@@ -161,9 +162,8 @@ final class BankOrganizer {
         if (has(
                 n,
                 "anti-venom|ancient brew|forgotten brew|coconut|cactus spine|lily of the"
-                    + " sands|amulet of chemistry|alchemist.s|swamp tar|giant egg sac|tangled"
-                    + " toad.s"))
-            return tab(6, "Herblore or Farming supplies");
+                        + " sands|amulet of chemistry|alchemist.s|swamp tar|giant egg sac|tangled"
+                        + " toad.s")) return tab(6, "Herblore or Farming supplies");
         if (has(
                 n,
                 "strength cape|strength hood|attack cape|defence cape|hitpoints cape|salve"
@@ -178,8 +178,7 @@ final class BankOrganizer {
                     + " feed|boots of lightness|circlet of water|desert shirt|desert robe|giantsoul"
                     + " amulet|pendant of ates|revitalising idol|anima portal|locator"
                     + " orb|^lyre$|grubby key|brimstone key|crystal key|loop half of key|tooth half"
-                    + " of key"))
-            return tab(1, "Travel, access or utility");
+                    + " of key")) return tab(1, "Travel, access or utility");
         if (has(
                 n,
                 "unidentified minerals|golden nugget|abyssal pearls|stardust|termite|pheasant tail"
@@ -205,8 +204,7 @@ final class BankOrganizer {
         if (has(
                 n,
                 "granite hammer|rock hammer|rock thrownhammer|dragon warhammer|elder maul|granite"
-                    + " maul"))
-            return tab(2, "Combat weapon or gargoyle finisher");
+                        + " maul")) return tab(2, "Combat weapon or gargoyle finisher");
         if (has(
                 n,
                 "clue scroll|clue bottle|clue nest|clue geode|casket|challenge scroll|mimic|master"
@@ -264,10 +262,10 @@ final class BankOrganizer {
         if (has(
                 n,
                 "arrow|bolt|dart|javelin|ballista|blowpipe|bow|atlatl|ranged cape|range"
-                    + " cape|masori|armadyl|karil|crystal (body|legs|helm)|d.hide|dragonhide"
-                    + " (body|chaps|vambraces|shield)|ava.s|anguish|archers ring|venator"
-                    + " ring|pegasian|ranger|buckler|coif|leather"
-                    + " (body|chaps|vambraces)|studded|eclipse moon|antler"))
+                        + " cape|masori|armadyl|karil|crystal (body|legs|helm)|d.hide|dragonhide"
+                        + " (body|chaps|vambraces|shield)|ava.s|anguish|archers ring|venator"
+                        + " ring|pegasian|ranger|buckler|coif|leather"
+                        + " (body|chaps|vambraces)|studded|eclipse moon|antler"))
             return tab(3, "Ranged gear, ammunition or ammo components");
         if (has(
                 n,
@@ -341,18 +339,17 @@ final class BankOrganizer {
         if (has(
                 n,
                 "broken axe|broken pickaxe|mining|prospector|lumberjack|forestry|beaver|rock"
-                    + " golem|heron|rift guardian|baby chinchompa|fishing"
-                    + " pet|tangleroot|rocky$|giant squirrel|rift"
-                    + " guardian|runecraft|hunter|trapper|jerboa|graahk|kyatt|larupia|desert"
-                    + " devil|sabre-toothed|spotted kebbit|polar kebbit|feldip weasel|long"
-                    + " kebbit|razor-backed|needle|thread|ice"
-                    + " gloves|salvage|compass|sextant|nautical|spyglass"))
+                        + " golem|heron|rift guardian|baby chinchompa|fishing"
+                        + " pet|tangleroot|rocky$|giant squirrel|rift"
+                        + " guardian|runecraft|hunter|trapper|jerboa|graahk|kyatt|larupia|desert"
+                        + " devil|sabre-toothed|spotted kebbit|polar kebbit|feldip weasel|long"
+                        + " kebbit|razor-backed|needle|thread|ice"
+                        + " gloves|salvage|compass|sextant|nautical|spyglass"))
             return tab(7, "Gathering, skilling or Sailing supplies");
         if (has(
                 n,
                 "coin pouch|numulite|token|emblem|mark of|trading sticks|trader|teleport|charged"
-                    + " orb|amulet of the eye"))
-            return tab(1, "Currency, travel or access");
+                        + " orb|amulet of the eye")) return tab(1, "Currency, travel or access");
         if (has(
                 n,
                 "instruction|manual|ancient page|desiccated page|scroll|puzzle box|board game|"

@@ -61,6 +61,7 @@ public final class PanelPreview {
                         saved.setups.put(t.id, t);
                         GuidePanel panel =
                                 new GuidePanel(
+                                        new com.google.gson.Gson(),
                                         null,
                                         new GuidePanel.Actions() {
                                             public void select(String id) {}

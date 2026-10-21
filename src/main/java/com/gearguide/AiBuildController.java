@@ -22,14 +22,15 @@ final class AiBuildController implements AutoCloseable {
     private final GuidePanel panel;
     private final Runnable changed;
     private final Path settingsFile;
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private final Map<AiBuildClient.Provider, String> keys =
             new EnumMap<>(AiBuildClient.Provider.class);
     private Settings settings = new Settings();
     private SwingWorker<Setup, Void> worker;
     private boolean closed;
 
-    AiBuildController(GuideStore store, GuidePanel panel, Path root, Runnable changed) {
+    AiBuildController(GuideStore store, GuidePanel panel, Path root, Gson gson, Runnable changed) {
+        this.gson = gson;
         this.store = store;
         this.panel = panel;
         this.changed = changed;
@@ -177,7 +178,7 @@ final class AiBuildController implements AutoCloseable {
         worker =
                 new SwingWorker<Setup, Void>() {
                     protected Setup doInBackground() throws Exception {
-                        return new AiBuildClient()
+                        return new AiBuildClient(gson)
                                 .generate(provider, model, key, captured, style, preference);
                     }
 
@@ -192,10 +193,11 @@ final class AiBuildController implements AutoCloseable {
                             if (!stillCurrent(captured, style)) {
                                 panel.error(
                                         "Your bank, account, task or style changed. Request a fresh"
-                                            + " build.");
+                                                + " build.");
                                 return;
                             }
                             SetupEditor.open(
+                                    gson,
                                     panel,
                                     captured,
                                     result,
@@ -204,15 +206,15 @@ final class AiBuildController implements AutoCloseable {
                                             if (!stillCurrent(captured, style))
                                                 throw new IllegalArgumentException(
                                                         "Your bank, account, task or style changed."
-                                                            + " Request a fresh build.");
+                                                                + " Request a fresh build.");
                                             Setup now = matching(style, captured.task.enemyType);
                                             if (!Objects.equals(
                                                     original,
                                                     now == null ? null : gson.toJson(now)))
                                                 throw new IllegalArgumentException(
                                                         "This saved build changed while you were"
-                                                            + " reviewing. Request again to"
-                                                            + " preserve those edits.");
+                                                                + " reviewing. Request again to"
+                                                                + " preserve those edits.");
                                             store.put(draft);
                                             changed.run();
                                             return true;
@@ -229,8 +231,8 @@ final class AiBuildController implements AutoCloseable {
                                     cause instanceof IllegalArgumentException
                                             ? cause.getMessage()
                                             : "Could not reach provider or request timed out. Check"
-                                                  + " connection and AI settings. No build was"
-                                                  + " saved.");
+                                                    + " connection and AI settings. No build was"
+                                                    + " saved.");
                         }
                     }
                 };

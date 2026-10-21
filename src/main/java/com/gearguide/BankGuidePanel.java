@@ -40,8 +40,8 @@ final class BankGuidePanel extends JPanel {
         top.add(
                 new JLabel(
                         "<html><body style='width:190px'>Match the numbered colours to bank tabs"
-                            + " 1–9.<br>Drag items yourself. ∞ is the inbox.<br>? = review;"
-                            + " assignments are editable.</html>"));
+                                + " 1–9.<br>Drag items yourself. ∞ is the inbox.<br>? = review;"
+                                + " assignments are editable.</html>"));
         filter.addItem("All items");
         filter.addItem("Needs review");
         destination.addItem("Automatic suggestion");
