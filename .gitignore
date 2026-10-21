@@ -1,0 +1,17 @@
+.gradle/
+build/
+.idea/
+*.iml
+connection.json
+snapshot.json
+*-snapshot.json
+*-bank.json
+*-setups.json
+*-bank-guide.json
+ai-settings.json
+*.log
+*.zip
+*-preview.png
+bank-tab-plan.csv
+
+runtime/

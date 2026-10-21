@@ -1,0 +1,14 @@
+# Changes
+
+## 0.10.0
+
+- Focused the public release on gear setups and bank organization. Removed Directions, its Slayer location data, path overlay and Shortest Path integration.
+- Replaced overflowing tabs with always-visible Loadout, Notes and Bank buttons.
+- Stopped rebuilding the saved-build selector and bank list on unchanged background updates. Preserved bank selection, scroll position and draft category assignments when data refreshes.
+- Added sidebar interaction regressions; retained ownership, requirement, account, potion and API validation tests.
+- Kept AI generation and the local assistant bridge optional. The bridge is off by default; a port conflict no longer prevents the plugin's gear and bank tools from starting.
+- Retained the ornamented Void requirement fix.
+- Updated development builds for RuneLite's current release, with release validation against 1.13.3.
+- Added public usage/privacy documentation, BSD-2-Clause code licensing, retained data attribution, a source-only Plugin Hub configuration and build workflow.
+
+Validation: 104 automated tests passed against RuneLite 1.13.3; the production Swing sidebar was rendered at its normal narrow width. No paid provider calls, automatic game actions or public submission were performed by these tests.

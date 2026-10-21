@@ -1,0 +1,40 @@
+plugins { id 'java' }
+repositories {
+    maven { url = 'https://repo.runelite.net'; content { includeGroupByRegex('net\\.runelite.*') } }
+    mavenCentral()
+}
+group = 'com.gearguide'
+version = '0.10.0'
+def rlVersion = project.findProperty('runeLiteVersion') ?: 'latest.release'
+dependencies {
+    compileOnly "net.runelite:client:${rlVersion}"
+    testImplementation "net.runelite:client:${rlVersion}"
+    testImplementation "net.runelite:jshell:${rlVersion}"
+    testImplementation 'junit:junit:4.13.2'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release.set(11) }
+tasks.register('run', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.gearguide.GearGuideLauncher'
+    jvmArgs '-ea'
+    args '--developer-mode'
+}
+tasks.register('preview', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.gearguide.PanelPreview'
+}
+tasks.register('shadowJar', Jar) {
+    dependsOn testClasses
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest { attributes('Main-Class': 'com.gearguide.GearGuideLauncher', 'Multi-Release': true) }
+    from sourceSets.main.output
+    from(sourceSets.test.output) { include 'com/gearguide/GearGuideLauncher.class' }
+    from { configurations.testRuntimeClasspath.findAll { !it.name.startsWith('junit-') && !it.name.startsWith('hamcrest-') }.collect { zipTree(it) } }
+    exclude 'META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', '**/module-info.class'
+}
+tasks.register('bankReport', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.gearguide.BankGuideReport'
+    args project.findProperty('snapshotFile') ?: 'bank-snapshot.json', project.findProperty('reportFile') ?: 'bank-tab-plan.csv'
+}
