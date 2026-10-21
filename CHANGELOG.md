@@ -2,6 +2,8 @@
 
 ## 0.10.1
 
+- Renamed the plugin to Ayra's Gear Guide.
+
 - Added editable rune supplies to saved loadouts, with required quantities and shortage checks in the sidebar.
 - The loadout bank view now includes rune supplies in separate rows below equipment and inventory.
 - Added optional `runes` metadata for the local API and AI-generated builds. Older setups remain compatible. Pouch filling and item charging remain manual.

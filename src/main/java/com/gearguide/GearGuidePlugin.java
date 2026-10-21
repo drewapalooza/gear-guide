@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import javax.swing.*;
 
 @PluginDescriptor(
-        name = "Gear Guide",
+        name = "Ayra's Gear Guide",
         description = "Save gear setups and organize your bank, with optional AI assistance",
         tags = {"bank", "gear", "inventory", "setup"})
 @PluginDependency(BankTagsPlugin.class)
@@ -312,7 +312,7 @@ public class GearGuidePlugin extends Plugin {
 
         navigation =
                 NavigationButton.builder()
-                        .tooltip("Gear Guide")
+                        .tooltip("Ayra's Gear Guide")
                         .icon(icon)
                         .priority(6)
                         .panel(panel)

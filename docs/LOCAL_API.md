@@ -1,6 +1,6 @@
 # Local assistant API
 
-Enable the local assistant connection in Gear Guide settings, restart, log in and open the bank. Open potion storage once per login.
+Enable the local assistant connection in Ayra's Gear Guide settings, restart, log in and open the bank. Open potion storage once per login.
 
 Run the included helper from this project directory:
 

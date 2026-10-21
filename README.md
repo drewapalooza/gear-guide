@@ -1,4 +1,4 @@
-# Gear Guide
+# Ayra's Gear Guide
 
 Gear setups and bank organization for RuneLite, with optional AI assistance.
 
@@ -20,7 +20,7 @@ There is no pathfinding, travel overlay, automatic movement, automatic withdrawa
 
 ## Basic use
 
-Enable **Gear Guide** and its built-in **Bank Tags** dependency. Log in and open your bank. Open potion storage once per login if you use stored potions.
+Enable **Ayra's Gear Guide** and its built-in **Bank Tags** dependency. Log in and open your bank. Open potion storage once per login if you use stored potions.
 
 Use the save icon to capture your current equipment and inventory. Review the name, combat style, target, items and notes, then save. The pencil edits an existing setup. **Loadout**, **Notes**, and **Bank** are always visible navigation buttons; changing pages preserves the controls on each page.
 
@@ -63,7 +63,7 @@ gradlew.bat test jar
 gradlew.bat run
 ```
 
-The default development dependency is RuneLite `latest.release`. Reproducible validation for this release used RuneLite **1.13.3**, selected with `-PruneLiteVersion=1.13.3`. The normal plugin artifact contains only Gear Guide; `shadowJar` and the Windows launch scripts are optional development conveniences that bundle a client for local testing. They are not the Plugin Hub submission format.
+The default development dependency is RuneLite `latest.release`. Reproducible validation for this release used RuneLite **1.13.3**, selected with `-PruneLiteVersion=1.13.3`. The normal plugin artifact contains only Ayra's Gear Guide; `shadowJar` and the Windows launch scripts are optional development conveniences that bundle a client for local testing. They are not the Plugin Hub submission format.
 
 ```text
 gradlew.bat -PruneLiteVersion=1.13.3 test jar shadowJar preview

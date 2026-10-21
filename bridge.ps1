@@ -12,12 +12,12 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path -LiteralPath $ConnectionFile)) {
-    throw 'Gear Guide is not running. Start the development client and enable the plugin.'
+    throw 'Ayra''s Gear Guide is not running. Start the development client and enable the plugin.'
 }
 $connection = Get-Content -LiteralPath $ConnectionFile -Raw | ConvertFrom-Json
 $baseUri = [Uri]$connection.baseUrl
 if ($baseUri.Scheme -ne 'http' -or $baseUri.Host -ne '127.0.0.1' -or $baseUri.AbsolutePath -ne '/' -or $baseUri.Query -or $baseUri.UserInfo) {
-    throw 'Invalid connection address. Only the local Gear Guide endpoint is allowed.'
+    throw 'Invalid connection address. Only the local Ayra''s Gear Guide endpoint is allowed.'
 }
 $request = @{
     Headers = @{ Authorization = 'Bearer ' + $connection.token }

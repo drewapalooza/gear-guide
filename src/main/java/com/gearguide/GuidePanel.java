@@ -132,7 +132,7 @@ public final class GuidePanel extends PluginPanel {
         JPanel header = column();
         JPanel titleRow = new JPanel(new BorderLayout());
         titleRow.setOpaque(false);
-        JLabel title = new JLabel("GEAR GUIDE");
+        JLabel title = new JLabel("Ayra's Gear Guide");
         title.setForeground(GREEN);
         title.setFont(new Font("SansSerif", Font.BOLD, 17));
         titleRow.add(title, BorderLayout.CENTER);
@@ -303,7 +303,7 @@ public final class GuidePanel extends PluginPanel {
         if (JOptionPane.showConfirmDialog(
                         this,
                         form,
-                        "Gear Guide settings",
+                        "Ayra's Gear Guide settings",
                         JOptionPane.OK_CANCEL_OPTION,
                         JOptionPane.PLAIN_MESSAGE)
                 == JOptionPane.OK_OPTION) {
@@ -321,7 +321,7 @@ public final class GuidePanel extends PluginPanel {
             return;
         }
         String request =
-                "Use Gear Guide's /v1/task hook. Select my existing "
+                "Use the /v1/task hook in Ayra's Gear Guide. Select my existing "
                         + taskStyle.getSelectedItem()
                         + " build for "
                         + snapshot.task.name
@@ -519,8 +519,8 @@ public final class GuidePanel extends PluginPanel {
                 content.add(
                         text(
                                 "Extra bank supplies.\n"
-                                    + "Fill pouch / charge items manually.\n"
-                                    + "Pouch contents are not checked.",
+                                        + "Fill pouch / charge items manually.\n"
+                                        + "Pouch contents are not checked.",
                                 MUTED));
                 JPanel runes = new JPanel(new GridLayout(0, 4, 4, 4));
                 runes.setOpaque(false);
@@ -675,6 +675,7 @@ public final class GuidePanel extends PluginPanel {
     }
 
     public void error(String message) {
-        JOptionPane.showMessageDialog(this, message, "Gear Guide", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(
+                this, message, "Ayra's Gear Guide", JOptionPane.ERROR_MESSAGE);
     }
 }
