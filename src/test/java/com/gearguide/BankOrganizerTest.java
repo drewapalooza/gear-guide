@@ -113,10 +113,10 @@ public class BankOrganizerTest {
     public void overridePersistsAndResets() throws Exception {
         Path root = Files.createTempDirectory("bank-guide-test");
         String a = "aaaaaaaaaaaaaaaaaaaaaaaa";
-        BankOrganizer o = new BankOrganizer(root, new com.google.gson.Gson());
+        BankOrganizer o = new BankOrganizer(TestFiles.root(root), new com.google.gson.Gson());
         o.account(a);
         o.assign(a, 385, 2);
-        BankOrganizer reload = new BankOrganizer(root, new com.google.gson.Gson());
+        BankOrganizer reload = new BankOrganizer(TestFiles.root(root), new com.google.gson.Gson());
         reload.account(a);
         assertEquals(2, BankOrganizer.choose(item(385, "Shark"), reload.overrides()).tab);
         reload.assign(a, 385, 0);
@@ -127,7 +127,8 @@ public class BankOrganizerTest {
     public void separatesAccountsAndRejectsStaleEdits() throws Exception {
         BankOrganizer o =
                 new BankOrganizer(
-                        Files.createTempDirectory("bank-guide-test"), new com.google.gson.Gson());
+                        TestFiles.root(Files.createTempDirectory("bank-guide-test")),
+                        new com.google.gson.Gson());
         String a = "aaaaaaaaaaaaaaaaaaaaaaaa", b = "bbbbbbbbbbbbbbbbbbbbbbbb";
         o.account(a);
         o.assign(a, 385, 2);
@@ -146,7 +147,7 @@ public class BankOrganizerTest {
         String a = "aaaaaaaaaaaaaaaaaaaaaaaa";
         Path file = root.resolve(a + "-bank-guide.json");
         Files.writeString(file, "not json");
-        BankOrganizer o = new BankOrganizer(root, new com.google.gson.Gson());
+        BankOrganizer o = new BankOrganizer(TestFiles.root(root), new com.google.gson.Gson());
         try {
             o.account(a);
             fail();

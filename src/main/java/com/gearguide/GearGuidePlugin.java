@@ -10,7 +10,6 @@ import net.runelite.api.events.*;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -21,12 +20,12 @@ import net.runelite.client.plugins.banktags.tabs.*;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
 import net.runelite.client.ui.*;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Filepath;
 
 import okhttp3.OkHttpClient;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
@@ -36,6 +35,8 @@ import javax.swing.*;
 
 @PluginDescriptor(
         name = "Ayra's Gear Guide",
+        internalName = "gear-guide",
+        legacyDataDirectory = "gear-guide",
         description = "Save gear setups and organize your bank, with optional AI assistance",
         tags = {"bank", "gear", "inventory", "setup"})
 @PluginDependency(BankTagsPlugin.class)
@@ -71,8 +72,6 @@ public class GearGuidePlugin extends Plugin {
     @Inject private OkHttpClient httpClient;
 
     private GuideStore store;
-
-    private LocalApi api;
 
     private AiBuildController ai;
 
@@ -120,7 +119,7 @@ public class GearGuidePlugin extends Plugin {
     @Override
     protected void startUp() throws Exception {
 
-        Path root = RuneLite.RUNELITE_DIR.toPath().resolve("gear-guide");
+        Filepath root = getPluginDirectory();
 
         store = new GuideStore(root, gson);
 
@@ -167,6 +166,10 @@ public class GearGuidePlugin extends Plugin {
 
                                             private GearGuidePlugin thisPlugin() {
                                                 return GearGuidePlugin.this;
+                                            }
+
+                                            public void importSetup() {
+                                                importSetupFile();
                                             }
 
                                             public void exportSnapshot() {
@@ -236,27 +239,6 @@ public class GearGuidePlugin extends Plugin {
                                                         });
                                             }
 
-                                            public void port(int value) {
-                                                configManager.setConfiguration(
-                                                        "gearguide", "port", value);
-                                            }
-
-                                            public int connectionPort() {
-                                                return config.port();
-                                            }
-
-                                            public boolean assistantConnectionEnabled() {
-                                                return config.assistantConnection();
-                                            }
-
-                                            public void assistantConnectionEnabled(
-                                                    boolean enabled) {
-                                                configManager.setConfiguration(
-                                                        "gearguide",
-                                                        "assistantConnection",
-                                                        enabled);
-                                            }
-
                                             public void requestBuild() {
                                                 if (ai != null) ai.request();
                                             }
@@ -274,21 +256,6 @@ public class GearGuidePlugin extends Plugin {
         else SwingUtilities.invokeAndWait(createPanel);
 
         ai = new AiBuildController(store, panel, root, gson, httpClient, this::setupChanged);
-
-        if (config.assistantConnection()) {
-            api = new LocalApi(store, gson, root.resolve("connection.json"), this::setupChanged);
-            try {
-                api.start(config.port());
-            } catch (Exception ex) {
-                api.close();
-                api = null;
-                SwingUtilities.invokeLater(
-                        () ->
-                                panel.aiStatus(
-                                        "Local connection unavailable. Gear and bank tools still"
-                                                + " work; check the port in settings."));
-            }
-        }
 
         tags.registerTag(TAG, id -> highlighted.contains(items.canonicalize(id)));
 
@@ -336,8 +303,6 @@ public class GearGuidePlugin extends Plugin {
             SwingUtilities.invokeLater(closing::close);
             ai = null;
         }
-
-        if (api != null) api.close();
 
         closeFilter();
         tags.unregisterTag(TAG);
@@ -806,7 +771,7 @@ public class GearGuidePlugin extends Plugin {
         SwingUtilities.invokeLater(
                 () -> {
                     if (running) {
-                        panel.update(s, saved, api == null ? 0 : api.port());
+                        panel.update(s, saved);
                         panel.bankGuideUpdate(s, assignments);
                     }
                 });
@@ -825,26 +790,62 @@ public class GearGuidePlugin extends Plugin {
             return;
         }
 
-        JFileChooser chooser = new JFileChooser();
-        chooser.setSelectedFile(new java.io.File("bank-snapshot.json"));
+        List<Filepath> selected =
+                new Filepath.Chooser()
+                        .setIsSave()
+                        .setDialogTitle("Export bank snapshot")
+                        .addExtensionFilter("JSON snapshot", "json")
+                        .setDefaultExtension("json")
+                        .setFileName("bank-snapshot.json")
+                        .showDialog(panel);
+        if (selected == null || selected.isEmpty()) return;
+        Filepath file = selected.get(0);
+        if (file.exists()
+                && JOptionPane.showConfirmDialog(
+                                panel,
+                                "Replace this file?",
+                                "Export bank",
+                                JOptionPane.YES_NO_OPTION)
+                        != JOptionPane.YES_OPTION) return;
+        try {
+            file.write(gson.toJson(s));
+        } catch (Exception ex) {
+            panel.error("Export failed: " + ex.getMessage());
+        }
+    }
 
-        if (chooser.showSaveDialog(panel) == JFileChooser.APPROVE_OPTION) {
-
-            Path path = chooser.getSelectedFile().toPath();
-
-            if (Files.exists(path)
-                    && JOptionPane.showConfirmDialog(
-                                    panel,
-                                    "Replace this file?",
-                                    "Export bank",
-                                    JOptionPane.YES_NO_OPTION)
-                            != JOptionPane.YES_OPTION) return;
-
-            try {
-                GuideStore.atomicWrite(path, gson.toJson(s));
-            } catch (Exception ex) {
-                panel.error("Export failed: " + ex.getMessage());
-            }
+    private void importSetupFile() {
+        Snapshot snapshot = store.snapshot();
+        if (snapshot == null || !snapshot.bankKnown) {
+            panelError("Open your bank before importing a setup.");
+            return;
+        }
+        List<Filepath> selected =
+                new Filepath.Chooser()
+                        .setIsOpen()
+                        .setDialogTitle("Import gear setup")
+                        .addExtensionFilter("JSON setup", "json")
+                        .showDialog(panel);
+        if (selected == null || selected.isEmpty()) return;
+        try {
+            Setup draft = SetupImport.read(selected.get(0), gson, snapshot);
+            SetupEditor.open(
+                    gson,
+                    panel,
+                    snapshot,
+                    draft,
+                    edited -> {
+                        try {
+                            store.put(edited);
+                            setupChanged();
+                            return true;
+                        } catch (Exception ex) {
+                            panelError(ex.getMessage());
+                            return false;
+                        }
+                    });
+        } catch (Exception ex) {
+            panelError("Import failed: " + ex.getMessage());
         }
     }
 

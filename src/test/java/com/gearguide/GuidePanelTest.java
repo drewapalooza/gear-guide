@@ -22,6 +22,53 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 public class GuidePanelTest {
+    @Test
+    public void importRemainsReachableWithoutAnAssistantConnection() throws Exception {
+        SwingUtilities.invokeAndWait(
+                () -> {
+                    AtomicInteger imports = new AtomicInteger();
+                    GuidePanel panel =
+                            new GuidePanel(
+                                    new com.google.gson.Gson(),
+                                    null,
+                                    new GuidePanel.Actions() {
+                                        public void select(String id) {}
+
+                                        public void delete(String id) {}
+
+                                        public void filter() {}
+
+                                        public void unfilter() {}
+
+                                        public void exportSnapshot() {}
+
+                                        public void capture() {}
+
+                                        public void importSetup() {
+                                            imports.incrementAndGet();
+                                        }
+                                    });
+                    panel.setSize(220, 600);
+                    panel.doLayout();
+                    AbstractButton importButton =
+                            find(panel, AbstractButton.class).stream()
+                                    .filter(
+                                            b ->
+                                                    "Import and review a gear setup JSON"
+                                                            .equals(b.getToolTipText()))
+                                    .findFirst()
+                                    .orElseThrow();
+                    importButton.getParent().doLayout();
+                    assertTrue(importButton.isVisible());
+                    assertTrue(importButton.getWidth() >= 24);
+                    assertTrue(
+                            importButton.getX() + importButton.getWidth()
+                                    <= importButton.getParent().getWidth());
+                    importButton.doClick(0);
+                    assertEquals(1, imports.get());
+                });
+    }
+
     private static <T> List<T> find(Container root, Class<T> type) {
         List<T> matches = new ArrayList<>();
         for (Component child : root.getComponents()) {
@@ -68,7 +115,7 @@ public class GuidePanelTest {
                     GuideStore.Saved saved = new GuideStore.Saved();
                     saved.active = setup.id;
                     saved.setups.put(setup.id, setup);
-                    panel.update(snapshot, saved, 0);
+                    panel.update(snapshot, saved);
                     assertTrue(
                             find(panel, javax.swing.JLabel.class).stream()
                                     .anyMatch(l -> "RUNE SUPPLIES".equals(l.getText())));
@@ -143,7 +190,7 @@ public class GuidePanelTest {
                     Setup setup = GuideStoreTest.setup(snapshot);
                     saved.setups.put(setup.id, setup);
                     saved.active = setup.id;
-                    panel.update(snapshot, saved, 0);
+                    panel.update(snapshot, saved);
                     JComboBox<?> builds = find(panel, JComboBox.class).get(0);
                     AtomicInteger modelChanges = new AtomicInteger();
                     builds.getModel()
@@ -162,7 +209,7 @@ public class GuidePanelTest {
                                         }
                                     });
                     button(panel, "Bank").doClick(0);
-                    for (int i = 0; i < 20; i++) panel.update(snapshot, saved, 0);
+                    for (int i = 0; i < 20; i++) panel.update(snapshot, saved);
                     assertTrue(button(panel, "Bank").isSelected());
                     assertEquals(0, modelChanges.get());
                     button(panel, "Notes").doClick(0);

@@ -112,13 +112,13 @@ public class RuneSuppliesTest {
     public void persistsRuneRequirementsAcrossRestart() throws Exception {
         Snapshot s = bank();
         Path root = temp.getRoot().toPath();
-        GuideStore store = new GuideStore(root, new Gson());
+        GuideStore store = new GuideStore(TestFiles.root(root), new Gson());
         store.publish(s);
         Setup t = setup(s);
         t.runes.add(new Pick(565, 1000));
         t.runes.get(0).note = "Pouch refill";
         store.put(t);
-        GuideStore restarted = new GuideStore(root, new Gson());
+        GuideStore restarted = new GuideStore(TestFiles.root(root), new Gson());
         restarted.publish(s);
         Pick rune = restarted.active().runes.get(0);
         assertEquals(565, rune.itemId);

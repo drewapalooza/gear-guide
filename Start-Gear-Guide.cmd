@@ -6,7 +6,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-if not exist "%~dp0build\libs\gear-guide-0.10.2-all.jar" (
+if not exist "%~dp0build\libs\gear-guide-0.11.0-all.jar" (
   echo Extract the complete Ayra's Gear Guide package before starting it.
   pause
   exit /b 1

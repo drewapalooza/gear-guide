@@ -1,5 +1,14 @@
 # Changes
 
+## 0.11.0
+
+- Replaced direct filesystem APIs with RuneLite's scoped `Filepath` storage and chooser. Requested RuneLite's automatic migration from the legacy data directory; saved setup JSON remains compatible.
+- Removed the local HTTP assistant server, discovery and bridge helper to comply with Plugin Hub rules. Added user-selected setup JSON import with account/revision/item validation and editor review before saving. Snapshot export now uses RuneLite's chooser.
+- Kept the free manual gear/bank workflow and optional, user-triggered AI generation through RuneLite's injected transport.
+- Added a production-bytecode policy check and tests for selected-file validation, storage replacement, migration metadata and the narrow sidebar's import button. Updated usage, privacy, format and submission documentation.
+
+Validation: 118 automated tests passed against RuneLite 1.13.3. Plugin JAR, optional development client and sample sidebar previews built successfully. No external provider requests are made by tests.
+
 ## 0.10.2
 
 - Replaced Java's HTTP client with RuneLite's injected OkHttpClient for optional AI requests. Retained the shared transport settings while keeping provider timeouts, redirects disabled and explicit cancellation scoped to the active request.

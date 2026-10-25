@@ -4,10 +4,11 @@ import static com.gearguide.Models.*;
 
 import com.google.gson.Gson;
 
+import net.runelite.client.util.Filepath;
+
 import okhttp3.OkHttpClient;
 
 import java.awt.*;
-import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 
@@ -23,7 +24,7 @@ final class AiBuildController implements AutoCloseable {
     private final GuideStore store;
     private final GuidePanel panel;
     private final Runnable changed;
-    private final Path settingsFile;
+    private final Filepath settingsFile;
     private final Gson gson;
     private final OkHttpClient httpClient;
     private final Map<AiBuildClient.Provider, String> keys =
@@ -36,7 +37,7 @@ final class AiBuildController implements AutoCloseable {
     AiBuildController(
             GuideStore store,
             GuidePanel panel,
-            Path root,
+            Filepath root,
             Gson gson,
             OkHttpClient httpClient,
             Runnable changed) {
@@ -45,10 +46,10 @@ final class AiBuildController implements AutoCloseable {
         this.store = store;
         this.panel = panel;
         this.changed = changed;
-        settingsFile = root.resolve("ai-settings.json");
+        settingsFile = root.joinSegment("ai-settings.json");
         try {
-            if (Files.exists(settingsFile)) {
-                Settings loaded = gson.fromJson(Files.readString(settingsFile), Settings.class);
+            if (settingsFile.exists()) {
+                Settings loaded = gson.fromJson(GuideStore.read(settingsFile), Settings.class);
                 if (loaded != null && loaded.provider != null && loaded.models != null)
                     settings = loaded;
             }
@@ -96,8 +97,7 @@ final class AiBuildController implements AutoCloseable {
         next.provider = current[0];
         next.models = draftModels;
         try {
-            Files.createDirectories(settingsFile.getParent());
-            Files.writeString(settingsFile, gson.toJson(next));
+            GuideStore.atomicWrite(settingsFile, gson.toJson(next));
             settings = next;
             keys.clear();
             keys.putAll(draftKeys);

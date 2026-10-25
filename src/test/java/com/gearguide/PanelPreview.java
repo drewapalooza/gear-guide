@@ -76,7 +76,7 @@ public final class PanelPreview {
 
                                             public void capture() {}
                                         });
-                        panel.update(s, saved, 17654);
+                        panel.update(s, saved);
                         panel.setSize(260, 900);
                         layout(panel);
                         BufferedImage out = new BufferedImage(260, 900, BufferedImage.TYPE_INT_RGB);
@@ -103,7 +103,7 @@ public final class PanelPreview {
                         t.runes.add(new Pick(563, 100));
                         t.runes.add(new Pick(554, 500));
                         t.runes.add(new Pick(556, 500));
-                        panel.update(s, saved, 17654);
+                        panel.update(s, saved);
                         for (Component c : panel.getComponents())
                             if (c instanceof GuideNavigation)
                                 ((GuideNavigation) c).select("loadout");

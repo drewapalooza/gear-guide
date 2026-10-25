@@ -15,7 +15,7 @@ public class BankCacheTest {
     @Rule public TemporaryFolder temp = new TemporaryFolder();
 
     private GuideStore store() {
-        return new GuideStore(temp.getRoot().toPath(), new Gson());
+        return new GuideStore(TestFiles.root(temp.getRoot().toPath()), new Gson());
     }
 
     private Snapshot live() {

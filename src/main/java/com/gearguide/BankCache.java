@@ -4,20 +4,21 @@ import static com.gearguide.Models.*;
 
 import com.google.gson.Gson;
 
+import net.runelite.client.util.Filepath;
+
 import java.io.IOException;
-import java.nio.file.*;
 import java.util.ArrayList;
 
 /**
  * Per-account bank-only disk cache. Inventory, equipment and task always come from the live client.
  */
 final class BankCache {
-    private final Path root;
+    private final Filepath root;
     private final Gson gson;
     private String account, lastContents;
     private Snapshot cached;
 
-    BankCache(Path root, Gson gson) {
+    BankCache(Filepath root, Gson gson) {
         this.root = root;
         this.gson = gson;
     }
@@ -29,10 +30,10 @@ final class BankCache {
             lastContents = null;
             if (!account.matches("[a-zA-Z0-9-]{1,64}"))
                 throw new IOException("Invalid bank cache account ID.");
-            Path file = root.resolve(account + "-bank.json");
-            if (Files.exists(file))
+            Filepath file = root.joinSegment(account + "-bank.json");
+            if (file.exists())
                 try {
-                    Snapshot loaded = gson.fromJson(Files.readString(file), Snapshot.class);
+                    Snapshot loaded = gson.fromJson(GuideStore.read(file), Snapshot.class);
                     if (loaded != null
                             && account.equals(loaded.accountId)
                             && loaded.bankKnown
@@ -65,7 +66,8 @@ final class BankCache {
                 saved.bankKnown = true;
                 saved.bankCapturedAt = next.bankCapturedAt;
                 saved.bank = next.bank;
-                GuideStore.atomicWrite(root.resolve(account + "-bank.json"), gson.toJson(saved));
+                GuideStore.atomicWrite(
+                        root.joinSegment(account + "-bank.json"), gson.toJson(saved));
                 cached = gson.fromJson(gson.toJson(saved), Snapshot.class);
                 lastContents = contents;
             }

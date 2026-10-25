@@ -4,7 +4,7 @@ repositories {
     mavenCentral()
 }
 group = 'com.gearguide'
-version = '0.10.2'
+version = '0.11.0'
 def rlVersion = project.findProperty('runeLiteVersion') ?: 'latest.release'
 dependencies {
     compileOnly "net.runelite:client:${rlVersion}"

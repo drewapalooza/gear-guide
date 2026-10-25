@@ -1,34 +1,38 @@
 # Plugin Hub submission candidate
 
-The candidate contains gear setups and bank organization, optional user-triggered AI generation, and an opt-in loopback assistant API. Directions and pathfinding have been removed.
+The candidate contains gear setups and bank organization, user-selected JSON import/export and optional user-triggered AI generation. Manual editing, import/export, validation and all bank tools work without a provider account or payment.
 
 ## Submission format
 
-RuneLite accepts a public source repository pinned to an exact Git commit through a pull request to `runelite/plugin-hub`. It does not approve the development-client bundle as an uploaded package. The marker file will be `plugins/gear-guide`:
+RuneLite builds a public source repository pinned to an exact Git commit. The existing submission is [runelite/plugin-hub#19140](https://github.com/runelite/plugin-hub/pull/19140). Update that PR's `plugins/gear-guide` marker after publishing each source fix:
 
 ```text
 repository=https://github.com/drewapalooza/gear-guide.git
 commit=<exact published source commit>
 ```
 
-Replace the placeholder with the exact published source commit; do not submit this template as a marker.
+The development client bundle is not the Hub submission artifact.
 
 ## Review notes
 
-- No movement, withdrawal, equipping, combat or other game-action automation.
-- Bank views use RuneLite's built-in Bank Tags APIs and require that plugin.
-- AI requests are user-triggered, show a data-sharing/cost dialog, and require review before saving.
-- Provider keys are session-only. The assistant bridge does not expose them.
-- The assistant bridge is disabled by default, binds to loopback, authenticates with a rotating token, rejects browser origins and validates all writes.
-- Code uses BSD-2-Clause. Bundled Wiki-derived datasets retain separate CC BY-NC-SA attribution and terms in `THIRD_PARTY_NOTICES.md`.
-- Only plugin classes and data belong in the Hub artifact. The `-all.jar`, Windows launcher, previews, runtime copies, snapshots and account files are development/support material.
-- Local test result: 117 passing tests against RuneLite 1.13.3, including intercepted provider requests and request cancellation. Optional AI requests use RuneLite's injected OkHttpClient. An actual Plugin Hub CI/reviewer result is still required; approval is not guaranteed.
+- All production disk access uses RuneLite `Filepath`. `getPluginDirectory()` supplies the scoped storage root; `legacyDataDirectory` requests RuneLite's migration of the previous storage directory. Imports/exports use `Filepath.Chooser` for explicitly selected files. There is no production `Filepath.Unchecked` use.
+- The former HTTP assistant server, connection discovery and bridge helper have been removed. External advice uses file export/import with validation and editor review before saving.
+- Optional AI requests use RuneLite's injected `OkHttpClient` and `Gson`. Requests require a data-sharing/cost dialog; provider keys are session-only and account identifiers/revisions are removed from requests. No automatic or periodic generation.
+- No movement, withdrawal, equipping, combat or other game-action automation. Bank views use the built-in Bank Tags APIs. Potion-storage scripts only query observed dose counts and the selected dose size.
+- No reflection, native libraries, subprocesses, downloaded code, own network clients or changes to other plugins' settings. Notes are static setup text, not live combat indicators.
+- Code uses BSD-2-Clause with retained author credits. Bundled Wiki-derived data retains separate CC BY-NC-SA attribution and terms in `THIRD_PARTY_NOTICES.md`.
+- Only production plugin classes, resources and licensing belong in the Hub JAR. Tests, previews, development launchers, client bundles, account files and snapshots are excluded.
 
-## Before submission
+## Validation
 
-1. Review the public source, author name, license and screenshots.
-2. Publish the source repository and confirm the build workflow passes.
-3. Pin the published commit in the Hub marker and open one submission pull request.
-4. Respond to CI or reviewer requests on that same pull request.
+118 automated tests pass against RuneLite 1.13.3, including selected-file imports, atomic scoped storage, account/revision validation, rune quantities, intercepted AI transport/cancellation and narrow sidebar controls. The production-bytecode test checks prohibited file, server, runtime and transport API references. Generated screenshots use labelled sample data.
 
-Official process: https://github.com/runelite/plugin-hub#submitting-a-plugin
+The published source and pinned Hub marker must both pass GitHub CI. Maintainers determine approval.
+
+## Official rules reviewed
+
+- [Submission instructions](https://github.com/runelite/plugin-hub#submitting-a-plugin)
+- [Plugin Hub review process](https://github.com/runelite/runelite/wiki/Plugin-Hub-Review)
+- [Rejected features and forbidden language features](https://github.com/runelite/runelite/wiki/Rejected-or-Rolled-Back-Features#forbidden-language-features)
+- [Filepath API](https://static.runelite.net/runelite-client/apidocs/net/runelite/client/util/Filepath.html)
+- [Jagex third-party client guidelines](https://secure.runescape.com/m=news/third-party-client-guidelines?oldschool=1)

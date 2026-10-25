@@ -2,17 +2,22 @@ package com.gearguide;
 
 import static com.gearguide.Models.*;
 
+import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 
+import net.runelite.client.util.Filepath;
+
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
 
-/** All shared state is guarded here; HTTP workers never access the game client. */
+/** All shared state is guarded here; background workers never access the game client. */
 public final class GuideStore {
-    private final Path root;
+    private final Filepath root;
     private final Gson gson;
     private final BankCache bankCache;
     private Snapshot snapshot;
@@ -26,7 +31,7 @@ public final class GuideStore {
         public boolean autoSelect = true;
     }
 
-    public GuideStore(Path root, Gson gson) {
+    public GuideStore(Filepath root, Gson gson) {
         this.root = root;
         this.gson = gson;
         this.bankCache = new BankCache(root, gson);
@@ -53,11 +58,9 @@ public final class GuideStore {
     public synchronized void publish(Snapshot next) throws IOException {
         bankCache.apply(next);
         if (snapshot == null || !snapshot.accountId.equals(next.accountId)) {
-            Path file = root.resolve(next.accountId + "-setups.json");
+            Filepath file = root.joinSegment(next.accountId + "-setups.json");
             Saved loaded =
-                    Files.exists(file)
-                            ? gson.fromJson(Files.readString(file), Saved.class)
-                            : new Saved();
+                    file.exists() ? gson.fromJson(GuideStore.read(file), Saved.class) : new Saved();
             if (loaded == null || loaded.setups == null)
                 throw new IOException(
                         "Invalid saved setup file; preserve it and repair before continuing.");
@@ -210,25 +213,29 @@ public final class GuideStore {
     }
 
     private void persist(Saved value) throws IOException {
-        atomicWrite(root.resolve(snapshot.accountId + "-setups.json"), gson.toJson(value));
+        atomicWrite(root.joinSegment(snapshot.accountId + "-setups.json"), gson.toJson(value));
     }
 
-    public static void atomicWrite(Path file, String value) throws IOException {
-        Files.createDirectories(file.toAbsolutePath().getParent());
-        Path temp = Files.createTempFile(file.toAbsolutePath().getParent(), "gear-guide-", ".tmp");
+    static String read(Filepath file) throws IOException {
+        try (Reader reader = file.openReader()) {
+            return CharStreams.toString(reader);
+        }
+    }
+
+    public static void atomicWrite(Filepath file, String value) throws IOException {
+        Filepath parent = file.getParent();
+        parent.createDirectories();
+        Filepath temp = parent.createTempFile("gear-guide-", ".tmp");
         try {
-            Files.writeString(temp, value, StandardCharsets.UTF_8);
+            temp.write(value);
             try {
-                Files.move(
-                        temp,
-                        file,
-                        StandardCopyOption.ATOMIC_MOVE,
-                        StandardCopyOption.REPLACE_EXISTING);
+                temp.moveTo(
+                        file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException ex) {
-                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
+                temp.moveTo(file, StandardCopyOption.REPLACE_EXISTING);
             }
         } finally {
-            Files.deleteIfExists(temp);
+            temp.deleteIfExists();
         }
     }
 
@@ -273,6 +280,8 @@ public final class GuideStore {
 
     public static void validate(Setup s, Snapshot bank) {
         if (s == null || s.schemaVersion != 1) fail("Expected schemaVersion 1.");
+        if (!Arrays.asList("melee", "ranged", "magic", "hybrid").contains(s.combatStyle))
+            fail("Unknown combatStyle.");
         GearUpgrades.validate(s);
         if (!Objects.equals(s.accountId, bank.accountId)) fail("Wrong accountId.");
         if (!Objects.equals(s.basedOnRevision, bank.revision))

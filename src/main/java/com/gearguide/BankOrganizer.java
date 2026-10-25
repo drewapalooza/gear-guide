@@ -4,8 +4,9 @@ import static com.gearguide.Models.*;
 
 import com.google.gson.*;
 
+import net.runelite.client.util.Filepath;
+
 import java.awt.Color;
-import java.nio.file.*;
 import java.util.*;
 
 /** Read-only bank guide. Assignments are local metadata, never bank operations. */
@@ -45,12 +46,12 @@ final class BankOrganizer {
         }
     }
 
-    private final Path root;
+    private final Filepath root;
     private final Gson gson;
     private String account;
     private Map<Integer, Integer> overrides = new HashMap<>();
 
-    BankOrganizer(Path root, Gson gson) {
+    BankOrganizer(Filepath root, Gson gson) {
         this.root = root;
         this.gson = gson;
     }
@@ -61,10 +62,10 @@ final class BankOrganizer {
         overrides = new HashMap<>();
         if (id == null) return;
         if (!id.matches("[a-f0-9]{24}")) throw new IllegalArgumentException("Invalid account");
-        Path file = root.resolve(id + "-bank-guide.json");
-        if (Files.exists(file)) {
+        Filepath file = root.joinSegment(id + "-bank-guide.json");
+        if (file.exists()) {
             try {
-                JsonObject data = new JsonParser().parse(Files.readString(file)).getAsJsonObject();
+                JsonObject data = new JsonParser().parse(GuideStore.read(file)).getAsJsonObject();
                 for (Map.Entry<String, JsonElement> e : data.entrySet()) {
                     int item = Integer.parseInt(e.getKey()), tab = e.getValue().getAsInt();
                     if (item > 0 && tab >= 1 && tab <= 9) overrides.put(item, tab);
@@ -86,7 +87,7 @@ final class BankOrganizer {
         Map<Integer, Integer> next = new HashMap<>(overrides);
         if (tab == 0) next.remove(item);
         else next.put(item, tab);
-        GuideStore.atomicWrite(root.resolve(account + "-bank-guide.json"), gson.toJson(next));
+        GuideStore.atomicWrite(root.joinSegment(account + "-bank-guide.json"), gson.toJson(next));
         overrides = next;
     }
 

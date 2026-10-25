@@ -167,11 +167,11 @@ public class GuideStoreTest {
     @Test
     public void persistsAndSeparatesAccounts() throws Exception {
         Path root = temp.getRoot().toPath();
-        GuideStore store = new GuideStore(root, new Gson());
+        GuideStore store = new GuideStore(TestFiles.root(root), new Gson());
         Snapshot s = snapshot();
         store.publish(s);
         store.put(setup(s));
-        GuideStore restarted = new GuideStore(root, new Gson());
+        GuideStore restarted = new GuideStore(TestFiles.root(root), new Gson());
         restarted.publish(s);
         assertEquals("bloodvelds", restarted.active().id);
         Snapshot other = snapshot();
@@ -186,7 +186,7 @@ public class GuideStoreTest {
 
     @Test
     public void failedValidationDoesNotOverwriteSavedSetup() throws Exception {
-        GuideStore store = new GuideStore(temp.getRoot().toPath(), new Gson());
+        GuideStore store = new GuideStore(TestFiles.root(temp.getRoot().toPath()), new Gson());
         Snapshot s = snapshot();
         store.publish(s);
         store.put(setup(s));
@@ -203,7 +203,7 @@ public class GuideStoreTest {
 
     @Test
     public void deletePersistsAndClearsSelection() throws Exception {
-        GuideStore store = new GuideStore(temp.getRoot().toPath(), new Gson());
+        GuideStore store = new GuideStore(TestFiles.root(temp.getRoot().toPath()), new Gson());
         Snapshot s = snapshot();
         store.publish(s);
         store.put(setup(s));

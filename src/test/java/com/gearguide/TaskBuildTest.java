@@ -30,7 +30,7 @@ public class TaskBuildTest {
 
     @Before
     public void start() throws Exception {
-        store = new GuideStore(temp.getRoot().toPath(), new Gson());
+        store = new GuideStore(TestFiles.root(temp.getRoot().toPath()), new Gson());
         bank = GuideStoreTest.snapshot();
         store.publish(bank);
     }
@@ -140,7 +140,7 @@ public class TaskBuildTest {
         s.notes = "Personal";
         store.put(s);
         store.preferences("magic", false);
-        GuideStore restarted = new GuideStore(temp.getRoot().toPath(), new Gson());
+        GuideStore restarted = new GuideStore(TestFiles.root(temp.getRoot().toPath()), new Gson());
         restarted.publish(bank);
         assertEquals("magic", restarted.saved().preferredStyle);
         assertFalse(restarted.saved().autoSelect);

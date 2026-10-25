@@ -23,6 +23,8 @@ public final class GuidePanel extends PluginPanel {
 
         void exportSnapshot();
 
+        default void importSetup() {}
+
         void capture();
 
         default boolean save(Setup setup) {
@@ -32,18 +34,6 @@ public final class GuidePanel extends PluginPanel {
         default void pollTask() {}
 
         default void aiSettings() {}
-
-        default void port(int value) {}
-
-        default int connectionPort() {
-            return 17654;
-        }
-
-        default boolean assistantConnectionEnabled() {
-            return false;
-        }
-
-        default void assistantConnectionEnabled(boolean enabled) {}
 
         default void bankGuide(boolean active) {}
 
@@ -116,7 +106,6 @@ public final class GuidePanel extends PluginPanel {
     private final GuideNavigation tabs;
     private GuideStore.Saved latestSaved;
     private java.util.List<String> lastChoices = Collections.emptyList();
-    private int apiPort;
     private String lastNotes;
     private final com.google.gson.Gson gson;
 
@@ -217,7 +206,7 @@ public final class GuidePanel extends PluginPanel {
         tabs.addPage("notes", "Notes", "Task notes", noteScroll);
         tabs.addPage("bank", "Bank", "Bank guide", bankGuide);
         add(tabs, BorderLayout.CENTER);
-        JPanel footer = new JPanel(new GridLayout(1, 4, 6, 0));
+        JPanel footer = new JPanel(new GridLayout(1, 5, 6, 0));
         footer.setOpaque(false);
         footer.add(
                 iconButton(
@@ -230,6 +219,8 @@ public final class GuidePanel extends PluginPanel {
         footer.add(
                 iconButton(
                         "save", "Save your currently worn gear and inventory", actions::capture));
+        footer.add(
+                iconButton("import", "Import and review a gear setup JSON", actions::importSetup));
         footer.add(
                 iconButton("export", "Export your bank snapshot as JSON", actions::exportSnapshot));
         footer.add(
@@ -269,7 +260,6 @@ public final class GuidePanel extends PluginPanel {
         style.setSelectedItem(taskStyle.getSelectedItem());
         JCheckBox auto =
                 new JCheckBox("Auto-select saved build for new tasks", autoTask.isSelected());
-        JSpinner port = new JSpinner(new SpinnerNumberModel(apiPort, 1024, 65535, 1));
         JPanel form = new JPanel(new GridLayout(0, 1, 5, 5));
         form.add(new JLabel("Preferred combat style"));
         form.add(style);
@@ -285,13 +275,6 @@ public final class GuidePanel extends PluginPanel {
         form.add(aiRow);
         JCheckBox colourBank = new JCheckBox("Colour all bank items", actions.bankGuideEnabled());
         form.add(colourBank);
-        JCheckBox connection =
-                new JCheckBox(
-                        "Enable local assistant connection (restart required)",
-                        actions.assistantConnectionEnabled());
-        form.add(connection);
-        form.add(new JLabel("Local API port (restart required after changing)"));
-        form.add(port);
         form.add(new JLabel(status.getText()));
         form.add(new JLabel(potions.getText()));
         if (snapshot != null)
@@ -309,9 +292,6 @@ public final class GuidePanel extends PluginPanel {
                 == JOptionPane.OK_OPTION) {
             actions.preferences((String) style.getSelectedItem(), auto.isSelected());
             actions.bankGuideEnabled(colourBank.isSelected());
-            actions.assistantConnectionEnabled(connection.isSelected());
-            int chosen = (Integer) port.getValue();
-            if (chosen != apiPort) actions.port(chosen);
         }
     }
 
@@ -321,11 +301,12 @@ public final class GuidePanel extends PluginPanel {
             return;
         }
         String request =
-                "Use the /v1/task hook in Ayra's Gear Guide. Select my existing "
+                "Use my exported Ayra's Gear Guide bank snapshot to prepare a "
                         + taskStyle.getSelectedItem()
                         + " build for "
                         + snapshot.task.name
-                        + " if one exists; otherwise create and push it from my current bank."
+                        + ". Return setup JSON for Import setup, retaining the snapshot accountId"
+                        + " and revision as basedOnRevision. Do not invent owned items."
                         + " Preserve my edited builds. Choose task-relevant travel and utility"
                         + " items from my owned supplies, including explicit rune supplies in the"
                         + " optional runes array. Format task notes as Markdown with"
@@ -376,8 +357,7 @@ public final class GuidePanel extends PluginPanel {
         return p;
     }
 
-    public void update(Snapshot s, GuideStore.Saved saved, int port) {
-        apiPort = port > 0 ? port : actions.connectionPort();
+    public void update(Snapshot s, GuideStore.Saved saved) {
         snapshot = s;
         latestSaved = saved;
         syncChoices(saved);
@@ -394,15 +374,10 @@ public final class GuidePanel extends PluginPanel {
                                 ? "No active Slayer task"
                                 : s.task.name + " · " + s.task.remaining);
         taskLabel.setToolTipText(s == null ? "" : s.task.name + " " + s.task.location);
-        status.setText(
-                port > 0
-                        ? "Local connection · " + port
-                        : actions.assistantConnectionEnabled()
-                                ? "Assistant connection unavailable; restart or change port"
-                                : "Local assistant connection off");
+        status.setText("User-selected JSON import / export");
         freshness.setText(
                 s == null || !s.bankKnown
-                        ? "Open your bank to share items"
+                        ? "Open your bank to read items"
                         : s.bankOpen
                                 ? "Bank synced · " + s.counts().size() + " items"
                                 : "Bank cached · reopen to refresh");

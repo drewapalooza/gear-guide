@@ -14,7 +14,8 @@ Gear setups and bank organization for RuneLite, with optional AI assistance.
 - Categorize bank items into nine numbered colours, search and filter them, and save your own category assignments.
 - Group the current bank view visually without moving stored items.
 - Optionally match saved setups to a Slayer task and combat style.
-- Optionally generate a setup through your chosen AI provider, or connect a local assistant.
+- Import a setup JSON from external advice and review it before saving.
+- Optionally generate a setup through your chosen AI provider.
 
 There is no pathfinding, travel overlay, automatic movement, automatic withdrawal, equipping, banking, combat, or offer placement. Directions and its Shortest Path integration were removed from this release.
 
@@ -34,23 +35,23 @@ The **Bank** page shows category suggestions. A `?` marks an unverified suggesti
 
 ## Optional AI generation
 
-No provider account or API key is needed for manual setups and bank tools. In settings, choose a provider, enter a model ID supported by that provider and supply your own key. Keys are kept in memory for that plugin session, not written to configuration, exported, or exposed through the assistant connection. Provider/model choices are saved locally.
+No provider account or API key is needed for manual setups, import/export and bank tools. In settings, choose a provider, enter a model ID supported by that provider and supply your own key. Keys are kept in memory for that plugin session, not written to configuration or exported. Provider/model choices are saved locally.
 
 Requests run only when you choose **Request a build** and accept the data-sharing dialog. The chosen provider receives your task, bank items, equipment, inventory, skill levels, known potion storage and entered preferences. Account IDs and snapshot revisions are removed. Provider usage charges may apply. There is no periodic or automatic AI generation.
 
 The result must pass the same ownership, quantity and skill validation as manual setups. Review it before saving. The integration has no live Wiki lookup and cannot verify all mechanics, quests or unlocks. Cancelling discards the result, but does not guarantee that the provider avoided a charge.
 
-## Optional local assistant connection
+## File import and export
 
-The connection is **off by default**. Enable it explicitly in settings and restart the plugin to use the included `bridge.ps1` helper. Ordinary gear and bank features continue working if the chosen port is unavailable.
+Use the export icon to choose where to save a bank snapshot. You can share this file with an external adviser or chat service of your choice. It contains your observed items, levels, task and a derived account identifier; review it before sharing. The plugin does not send the export anywhere.
 
-When enabled, it binds to `127.0.0.1` only and uses a new random bearer token each start. It rejects browser-origin requests, unexpected host headers and non-local connections. It exposes snapshots and saved-setup operations; it has no gameplay-action endpoints and does not expose provider keys.
+Use the import icon to select a returned setup JSON. The account, bank revision, items, quantities, equipment requirements and rune supplies are validated before the editor opens. Review the draft and choose **Save build** to apply it. Cancelling leaves saved setups unchanged. See [the setup format](docs/SETUP_FORMAT.md).
 
-Discovery is stored in `.runelite/gear-guide/connection.json`. The token is private; do not share or commit this file. `bridge.ps1` reads the file without printing the token. See [the local API guide](docs/LOCAL_API.md).
+This release replaces the former local HTTP assistant connection with user-selected files, in accordance with RuneLite's Plugin Hub rules. There is no listening HTTP server. File access uses RuneLite's `Filepath` API and chooser.
 
 ## Data and limitations
 
-Saved setups, cached bank observations, category overrides and non-secret provider/model choices live in `.runelite/gear-guide/`, separated by account where appropriate. Account identifiers are derived from the game account hash. A cached bank can be stale; reopen it to refresh quantities. Logging out clears the live shared snapshot. Potion storage must be observed each login.
+Saved setups, cached bank observations, category overrides and non-secret provider/model choices live in `.runelite/plugin-data/gear-guide/`, separated by account where appropriate. RuneLite migrates an existing `.runelite/gear-guide/` directory on first use when the new directory does not exist. Account identifiers are derived from the game account hash. A cached bank can be stale; reopen it to refresh quantities. Logging out clears the live snapshot. Potion storage must be observed each login.
 
 The plugin does not read rune-pouch contents, item charges, other storage, quest completion, diaries or all unlocks. Its equipment-requirement table has incomplete coverage: an unknown requirement prevents a new recommendation unless that item is currently worn. Ornamented Void variants inherit their base item's requirements. Gear suggestions and category heuristics are not measured DPS rankings or instructions to discard items.
 
@@ -69,7 +70,7 @@ The default development dependency is RuneLite `latest.release`. Reproducible va
 gradlew.bat -PruneLiteVersion=1.13.3 test jar shadowJar preview
 ```
 
-Tests cover validation, account separation, saved builds, potion pools, local HTTP authorization, AI response validation, bank assignments and sidebar interaction. Preview screenshots use labelled sample data.
+Tests cover validation, account separation, saved builds, potion pools, file import, scoped storage, AI transport and response validation, bank assignments and sidebar interaction. A production-bytecode check guards against the prohibited file, server, runtime and transport APIs used in previous versions. Preview screenshots use labelled sample data.
 
 ## Plugin Hub submission
 

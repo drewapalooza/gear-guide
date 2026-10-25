@@ -88,6 +88,14 @@ final class GuideIcon implements Icon {
                 g.drawRect(6, 2, 8, 5);
                 g.drawRect(6, 11, 8, 7);
                 break;
+            case "import":
+                g.drawLine(10, 17, 10, 6);
+                g.drawLine(6, 10, 10, 6);
+                g.drawLine(10, 6, 14, 10);
+                g.drawLine(3, 7, 3, 2);
+                g.drawLine(3, 2, 17, 2);
+                g.drawLine(17, 2, 17, 7);
+                break;
             case "export":
                 g.drawLine(10, 2, 10, 13);
                 g.drawLine(6, 9, 10, 13);
