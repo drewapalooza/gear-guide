@@ -93,7 +93,7 @@ public final class LocalApi implements AutoCloseable {
                                 "apiVersion",
                                 1,
                                 "pluginVersion",
-                                "0.10.1",
+                                "0.10.2",
                                 "loggedIn",
                                 s != null,
                                 "bankKnown",

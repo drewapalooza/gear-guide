@@ -1,5 +1,12 @@
 # Changes
 
+## 0.10.2
+
+- Replaced Java's HTTP client with RuneLite's injected OkHttpClient for optional AI requests. Retained the shared transport settings while keeping provider timeouts, redirects disabled and explicit cancellation scoped to the active request.
+- Corrected the BSD-2-Clause licence to attribute all code authors directly. Kept the separate third-party data notices and source-file copyright headers.
+
+Validation: 117 automated tests passed against RuneLite 1.13.3. New transport tests cover all four providers, UTF-8 payloads, inherited transport configuration, safe HTTP failures, response cleanup and cancellation. No provider requests are made by these tests.
+
 ## 0.10.1
 
 - Renamed the plugin to Ayra's Gear Guide.

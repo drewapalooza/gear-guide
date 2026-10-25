@@ -22,6 +22,8 @@ import net.runelite.client.plugins.banktags.tabs.LayoutManager;
 import net.runelite.client.ui.*;
 import net.runelite.client.ui.overlay.OverlayManager;
 
+import okhttp3.OkHttpClient;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.file.*;
@@ -66,6 +68,7 @@ public class GearGuidePlugin extends Plugin {
     @Inject private ConfigManager configManager;
 
     @Inject private Gson gson;
+    @Inject private OkHttpClient httpClient;
 
     private GuideStore store;
 
@@ -270,7 +273,7 @@ public class GearGuidePlugin extends Plugin {
         if (SwingUtilities.isEventDispatchThread()) createPanel.run();
         else SwingUtilities.invokeAndWait(createPanel);
 
-        ai = new AiBuildController(store, panel, root, gson, this::setupChanged);
+        ai = new AiBuildController(store, panel, root, gson, httpClient, this::setupChanged);
 
         if (config.assistantConnection()) {
             api = new LocalApi(store, gson, root.resolve("connection.json"), this::setupChanged);

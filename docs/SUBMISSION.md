@@ -22,7 +22,7 @@ Replace the placeholder with the exact published source commit; do not submit th
 - The assistant bridge is disabled by default, binds to loopback, authenticates with a rotating token, rejects browser origins and validates all writes.
 - Code uses BSD-2-Clause. Bundled Wiki-derived datasets retain separate CC BY-NC-SA attribution and terms in `THIRD_PARTY_NOTICES.md`.
 - Only plugin classes and data belong in the Hub artifact. The `-all.jar`, Windows launcher, previews, runtime copies, snapshots and account files are development/support material.
-- Local test result: 104 passing tests against RuneLite 1.13.3. An actual Plugin Hub CI/reviewer result is still required; approval is not guaranteed.
+- Local test result: 117 passing tests against RuneLite 1.13.3, including intercepted provider requests and request cancellation. Optional AI requests use RuneLite's injected OkHttpClient. An actual Plugin Hub CI/reviewer result is still required; approval is not guaranteed.
 
 ## Before submission
 

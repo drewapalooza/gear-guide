@@ -6,25 +6,24 @@ import static org.junit.Assert.*;
 
 import com.google.gson.*;
 
-import org.junit.Test;
+import okhttp3.*;
 
-import java.net.http.HttpRequest;
+import org.junit.Test;
 
 public class AiBuildClientTest {
     @Test
     public void providerRequestsUseCorrectAuthAndEndpoint() {
         for (AiBuildClient.Provider p : AiBuildClient.Provider.values()) {
-            HttpRequest r = AiBuildClient.request(p, "chosen-model", "test-secret", "test prompt");
-            assertEquals("https", r.uri().getScheme());
-            assertEquals(p.endpoint, r.uri().toString());
+            Request r = AiBuildClient.request(p, "chosen-model", "test-secret", "test prompt");
+            assertEquals("https", r.url().scheme());
+            assertEquals(p.endpoint, r.url().toString());
             assertEquals("POST", r.method());
-            assertTrue(r.timeout().isPresent());
+            assertEquals("application/json; charset=utf-8", r.body().contentType().toString());
             if (p == AiBuildClient.Provider.CLAUDE) {
-                assertEquals("test-secret", r.headers().firstValue("x-api-key").get());
-                assertTrue(r.headers().firstValue("anthropic-version").isPresent());
-                assertFalse(r.headers().firstValue("Authorization").isPresent());
-            } else
-                assertEquals("Bearer test-secret", r.headers().firstValue("Authorization").get());
+                assertEquals("test-secret", r.header("x-api-key"));
+                assertNotNull(r.header("anthropic-version"));
+                assertNull(r.header("Authorization"));
+            } else assertEquals("Bearer test-secret", r.header("Authorization"));
         }
     }
 
@@ -50,7 +49,7 @@ public class AiBuildClientTest {
         Snapshot s = GuideStoreTest.snapshot();
         s.accountId = "private-account-id";
         s.revision = "private-revision";
-        String p = new AiBuildClient(new Gson()).prompt(s, "melee", "relaxed");
+        String p = new AiBuildClient(new Gson(), new OkHttpClient()).prompt(s, "melee", "relaxed");
         assertFalse(p.contains("private-account-id"));
         assertFalse(p.contains("private-revision"));
         assertTrue(p.contains("relaxed"));
@@ -90,7 +89,7 @@ public class AiBuildClientTest {
         s.accountId = "wrong";
         s.replaceExisting = true;
         Setup parsed =
-                new AiBuildClient(new Gson())
+                new AiBuildClient(new Gson(), new OkHttpClient())
                         .parse("```json\n" + new Gson().toJson(s) + "\n```", bank, "melee");
         assertEquals(bank.accountId, parsed.accountId);
         assertEquals("wyrms-melee", parsed.id);
@@ -103,7 +102,8 @@ public class AiBuildClientTest {
         bank.task.enemyType = "wyrms";
         Setup s = GuideStoreTest.setup(bank);
         s.equipment.values().iterator().next().itemId = 999999;
-        new AiBuildClient(new Gson()).parse(new Gson().toJson(s), bank, "melee");
+        new AiBuildClient(new Gson(), new OkHttpClient())
+                .parse(new Gson().toJson(s), bank, "melee");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -113,6 +113,7 @@ public class AiBuildClientTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidJsonIsRejected() {
-        new AiBuildClient(new Gson()).parse("not json", GuideStoreTest.snapshot(), "melee");
+        new AiBuildClient(new Gson(), new OkHttpClient())
+                .parse("not json", GuideStoreTest.snapshot(), "melee");
     }
 }

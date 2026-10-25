@@ -4,6 +4,8 @@ import static com.gearguide.Models.*;
 
 import com.google.gson.Gson;
 
+import okhttp3.OkHttpClient;
+
 import java.awt.*;
 import java.nio.file.*;
 import java.util.*;
@@ -23,14 +25,23 @@ final class AiBuildController implements AutoCloseable {
     private final Runnable changed;
     private final Path settingsFile;
     private final Gson gson;
+    private final OkHttpClient httpClient;
     private final Map<AiBuildClient.Provider, String> keys =
             new EnumMap<>(AiBuildClient.Provider.class);
     private Settings settings = new Settings();
     private SwingWorker<Setup, Void> worker;
+    private AiBuildClient requestClient;
     private boolean closed;
 
-    AiBuildController(GuideStore store, GuidePanel panel, Path root, Gson gson, Runnable changed) {
+    AiBuildController(
+            GuideStore store,
+            GuidePanel panel,
+            Path root,
+            Gson gson,
+            OkHttpClient httpClient,
+            Runnable changed) {
         this.gson = gson;
+        this.httpClient = httpClient;
         this.store = store;
         this.panel = panel;
         this.changed = changed;
@@ -175,16 +186,18 @@ final class AiBuildController implements AutoCloseable {
         String original = existing == null ? null : gson.toJson(existing);
         panel.aiStatus("Requesting build...");
         panel.aiBusy(true);
+        AiBuildClient client = new AiBuildClient(gson, httpClient);
+        requestClient = client;
         worker =
                 new SwingWorker<Setup, Void>() {
                     protected Setup doInBackground() throws Exception {
-                        return new AiBuildClient(gson)
-                                .generate(provider, model, key, captured, style, preference);
+                        return client.generate(provider, model, key, captured, style, preference);
                     }
 
                     protected void done() {
                         if (worker != this) return;
                         worker = null;
+                        requestClient = null;
                         panel.aiBusy(false);
                         if (closed) return;
                         panel.aiStatus("Ready");
@@ -262,8 +275,10 @@ final class AiBuildController implements AutoCloseable {
 
     void cancel() {
         if (worker != null) {
+            if (requestClient != null) requestClient.cancel();
             worker.cancel(true);
             worker = null;
+            requestClient = null;
             panel.aiBusy(false);
             panel.aiStatus("Cancelled");
         }

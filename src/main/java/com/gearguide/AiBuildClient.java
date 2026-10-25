@@ -4,9 +4,10 @@ import static com.gearguide.Models.*;
 
 import com.google.gson.*;
 
-import java.net.URI;
-import java.net.http.*;
-import java.time.Duration;
+import okhttp3.*;
+
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 
 /** No credentials or provider responses are logged or exposed through the local API. */
 final class AiBuildClient {
@@ -65,9 +66,24 @@ final class AiBuildClient {
                 + " web lookup is available; disclose uncertain mechanics. Never claim to have"
                 + " verified current wiki facts.";
     private final Gson gson;
+    private final OkHttpClient http;
+    private volatile Call activeCall;
+    private volatile boolean cancelled;
 
-    AiBuildClient(Gson gson) {
+    AiBuildClient(Gson gson, OkHttpClient httpClient) {
         this.gson = gson;
+        // Retain RuneLite's connection pool, proxy and interceptors.
+        this.http =
+                httpClient
+                        .newBuilder()
+                        .connectTimeout(15, TimeUnit.SECONDS)
+                        .readTimeout(120, TimeUnit.SECONDS)
+                        .writeTimeout(120, TimeUnit.SECONDS)
+                        .callTimeout(120, TimeUnit.SECONDS)
+                        .followRedirects(false)
+                        .followSslRedirects(false)
+                        .retryOnConnectionFailure(false)
+                        .build();
     }
 
     static JsonObject payload(Provider provider, String model, String prompt) {
@@ -104,18 +120,16 @@ final class AiBuildClient {
                 + data;
     }
 
-    static HttpRequest request(Provider provider, String model, String key, String prompt) {
+    static Request request(Provider provider, String model, String key, String prompt) {
         if (model == null || model.isBlank() || key == null || key.isBlank())
             throw new IllegalArgumentException("Enter a model ID and API key in AI settings.");
-        HttpRequest.Builder b =
-                HttpRequest.newBuilder(URI.create(provider.endpoint))
-                        .timeout(Duration.ofSeconds(120))
-                        .header("Content-Type", "application/json");
+        Request.Builder b = new Request.Builder().url(provider.endpoint);
         if (provider == Provider.CLAUDE)
             b.header("x-api-key", key).header("anthropic-version", "2023-06-01");
         else b.header("Authorization", "Bearer " + key);
-        return b.POST(
-                        HttpRequest.BodyPublishers.ofString(
+        return b.post(
+                        RequestBody.create(
+                                MediaType.get("application/json; charset=utf-8"),
                                 payload(provider, model, prompt).toString()))
                 .build();
     }
@@ -181,25 +195,40 @@ final class AiBuildClient {
             String style,
             String preference)
             throws Exception {
-        HttpClient http =
-                HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(15))
-                        .followRedirects(HttpClient.Redirect.NEVER)
-                        .build();
-        HttpResponse<String> response =
-                http.send(
-                        request(provider, model, key, prompt(snapshot, style, preference)),
-                        HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            String reason =
-                    response.statusCode() == 401 || response.statusCode() == 403
-                            ? "Check your key and model access."
-                            : response.statusCode() == 429
-                                    ? "Rate limit or credit limit reached."
-                                    : "Check model ID and provider account settings.";
-            throw new IllegalArgumentException(
-                    "Provider returned HTTP " + response.statusCode() + ". " + reason);
+        if (cancelled) throw new CancellationException();
+        Call call =
+                http.newCall(request(provider, model, key, prompt(snapshot, style, preference)));
+        activeCall = call;
+        try {
+            if (cancelled) {
+                call.cancel();
+                throw new CancellationException();
+            }
+            try (Response response = call.execute()) {
+                int status = response.code();
+                if (status != 200) {
+                    String reason =
+                            status == 401 || status == 403
+                                    ? "Check your key and model access."
+                                    : status == 429
+                                            ? "Rate limit or credit limit reached."
+                                            : "Check model ID and provider account settings.";
+                    throw new IllegalArgumentException(
+                            "Provider returned HTTP " + status + ". " + reason);
+                }
+                ResponseBody body = response.body();
+                if (body == null)
+                    throw new IllegalArgumentException("Provider returned an empty response.");
+                return parse(extract(provider, body.string()), snapshot, style);
+            }
+        } finally {
+            activeCall = null;
         }
-        return parse(extract(provider, response.body()), snapshot, style);
+    }
+
+    void cancel() {
+        cancelled = true;
+        Call call = activeCall;
+        if (call != null) call.cancel();
     }
 }
